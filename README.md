@@ -35,7 +35,7 @@ Please note that this is not object detection or segmentation. It visualizes and
 - A working webcam
 - macOS / Linux / Windows supported
 
-**Python packages**
+### Python packages
 
 - `torch`
 - `transformers`
@@ -43,7 +43,7 @@ Please note that this is not object detection or segmentation. It visualizes and
 - `opencv-python`
 - `numpy`
 
-**Installation**
+### Installation
 
 1) Create and activate an environment
 
@@ -65,7 +65,7 @@ pip install -U transformers huggingface_hub opencv-python numpy
 If you are on Apple Silicon (M1/M2/M3), install a PyTorch build that supports mps.
 If you are on an NVIDIA GPU machine, install the CUDA-enabled PyTorch build suitable for your CUDA version.
 
-**Running the Demo**
+### Running the Demo
 python vjepa2_object_tracking_webcam.py
 
 On startup, you should see logs like:
