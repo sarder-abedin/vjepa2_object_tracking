@@ -162,7 +162,8 @@ The demo can **replace** the action label’s `[something]` placeholders with de
 
 ## Demo Preview
 <img width="1023" height="532" alt="Screenshot 2026-03-02 at 09 28 46" src="https://github.com/user-attachments/assets/2936a968-7445-4429-8c55-2fdcf2d2a4b2" />
-<img width="784" height="592" alt="Screenshot 2026-03-02 at 09 28 58" src="https://github.com/user-attachments/assets/4bc932c8-e39d-49d0-abc7-623ba3cb0b1c" />
+<img width="721" height="246" alt="Screenshot 2026-03-02 at 09 41 53" src="https://github.com/user-attachments/assets/f9bc2709-567f-4df9-b3ea-4b5dc1d645e6" />
+
 
 
 ---
