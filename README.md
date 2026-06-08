@@ -12,6 +12,51 @@ This is **not** object detection or segmentation. It visualizes and tracks based
 
 ---
 
+## Quick Start with Docker
+
+A `Dockerfile` is included that installs everything needed to run **both** webcam demos in this repo (`vjepa2_object_tracking_webcam.py` and `vjepa2_ssv2_action_prediction_webcam.py`) — PyTorch, Transformers, OpenCV, Ultralytics YOLO, Pillow, plus the system libraries OpenCV needs for its GUI window and webcam capture.
+
+### 1) Build the image
+
+```bash
+docker build -t vjepa2-demo .
+```
+
+### 2) Run it (Linux, with webcam + GUI access)
+
+The scripts open a live OpenCV window (`cv2.imshow`) and read from `/dev/video0`, so the container needs access to your X11 display and the camera device:
+
+```bash
+xhost +local:docker
+
+docker run --rm -it \
+  --device=/dev/video0:/dev/video0 \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  vjepa2-demo
+```
+
+This runs the default command, the **SSV2 action recognition + YOLO/OWL-ViT demo**. To run the **patch-similarity tracker** instead, override the command:
+
+```bash
+docker run --rm -it \
+  --device=/dev/video0:/dev/video0 \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  vjepa2-demo python vjepa2_object_tracking_webcam.py
+```
+
+### 3) GPU acceleration (NVIDIA)
+
+Install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) on the host, then add `--gpus all` to the `docker run` command so PyTorch/YOLO can use CUDA inside the container.
+
+### Notes
+
+- Mount a volume for the Hugging Face cache (e.g. `-v $HOME/.cache/huggingface:/root/.cache/huggingface`) to persist downloaded model weights across container runs.
+- macOS/Windows don't support `--device` passthrough or native X11 the same way Linux does; either run the scripts directly on the host, or use an X server such as XQuartz (macOS) / VcXsrv (Windows) and a webcam-forwarding tool.
+
+---
+
 ## Demo Preview
 
 - **White dot**: the tracked/anchor patch.
