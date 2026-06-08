@@ -1,6 +1,8 @@
 FROM python:3.10-slim
 
-# System libraries required by OpenCV's GUI (cv2.imshow) and webcam capture
+# System libraries needed by OpenCV's GUI (cv2.imshow) and webcam capture.
+# This is a Linux-based image: it builds and runs the same way through
+# Docker on Linux, macOS, and Windows (Docker Desktop / WSL2) hosts.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 \
         libglib2.0-0 \
@@ -18,9 +20,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -U pip \
     && pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY tracker_webcam.py .
 
 ENV PYTHONUNBUFFERED=1
 
-# Default: V-JEPA2 SSV2 action recognition + YOLO/OWL-ViT detection demo
-CMD ["python", "vjepa2_ssv2_action_prediction_webcam.py"]
+CMD ["python", "tracker_webcam.py"]

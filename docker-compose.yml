@@ -1,0 +1,26 @@
+services:
+  tracker:
+    build: ./patch_tracker
+    image: vjepa2-patch-tracker
+    devices:
+      - /dev/video0:/dev/video0
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+    stdin_open: true
+    tty: true
+
+  action-yolo:
+    build: ./action_recognition_yolo
+    image: vjepa2-action-yolo
+    devices:
+      - /dev/video0:/dev/video0
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+    stdin_open: true
+    tty: true
