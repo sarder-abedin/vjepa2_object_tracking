@@ -1,0 +1,9 @@
+torch
+torchvision
+torchaudio
+transformers
+huggingface_hub
+opencv-python
+numpy
+Pillow
+ultralytics
