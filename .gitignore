@@ -1,1 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
 vjepaenv/
+
+# Distribution / packaging
+*.whl
+*.tar.gz
+
+# Model weights and large binaries
+# (yolov8n.pt is intentionally tracked; other downloaded weights should stay local)
+*.bin
+*.ckpt
+*.safetensors
+*.pth
+# *.pt  — uncomment if you want to stop tracking new .pt files
+
+# Hugging Face model cache
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Logs
+*.log
+logs/
+
+# IDE / editor
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+__MACOSX/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# Environment variable files
+.env
+.env.local
+.env.*.local
