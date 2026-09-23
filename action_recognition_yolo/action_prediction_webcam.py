@@ -181,6 +181,32 @@ def draw_patch_grid(img_bgr: np.ndarray, patch_px: int, color=(255, 255, 255), t
         cv2.line(img_bgr, (0, y), (w - 1, y), color, thickness, cv2.LINE_AA)
 
 
+def draw_colorbar_legend(img_bgr: np.ndarray, bar_h: int = 120, bar_w: int = 16, margin: int = 8) -> None:
+    """Draw a vertical JET colorbar on the right edge: top=High (red), bottom=Low (blue)."""
+    h, w = img_bgr.shape[:2]
+    x0 = w - margin - bar_w
+    y0 = h // 2 - bar_h // 2
+
+    # semi-transparent dark background for readability
+    overlay = img_bgr.copy()
+    cv2.rectangle(overlay, (x0 - 30, y0 - 20), (x0 + bar_w + 4, y0 + bar_h + 16), (0, 0, 0), -1)
+    cv2.addWeighted(overlay, 0.55, img_bgr, 0.45, 0, img_bgr)
+
+    # vertical gradient: top=255=red (high), bottom=0=blue (low)
+    for i in range(bar_h):
+        val = int(255 * (1.0 - i / (bar_h - 1)))
+        color = cv2.applyColorMap(np.array([[val]], dtype=np.uint8), cv2.COLORMAP_JET)[0, 0].tolist()
+        cv2.line(img_bgr, (x0, y0 + i), (x0 + bar_w - 1, y0 + i), color, 1)
+
+    # thin border around the bar
+    cv2.rectangle(img_bgr, (x0, y0), (x0 + bar_w - 1, y0 + bar_h - 1), (180, 180, 180), 1)
+
+    # labels
+    cv2.putText(img_bgr, "Sim.",  (x0 - 20, y0 - 7),           cv2.FONT_HERSHEY_SIMPLEX, 0.33, (200, 200, 200), 1, cv2.LINE_AA)
+    cv2.putText(img_bgr, "High",  (x0 - 28, y0 + 6),            cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.putText(img_bgr, "Low",   (x0 - 24, y0 + bar_h - 3),    cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv2.LINE_AA)
+
+
 def normalize_01(x: np.ndarray) -> np.ndarray:
     mn, mx = float(x.min()), float(x.max())
     if mx - mn < 1e-8:
@@ -841,10 +867,15 @@ def main():
             if SHOW_GRID:
                 draw_patch_grid(left, patch_size)
 
-            # stable canvas
+            # colour-scale legend on the heatmap panel
+            if SHOW_LATENT and SHOW_LATENT_HEATMAP and state.last_heat_256 is not None:
+                draw_colorbar_legend(left)
+
+            # stable canvas: right panel = clean video stream (no heatmap overlay)
             if SHOW_LATENT:
-                right = state.last_scatter.copy()
-                canvas = np.hstack([left, right])
+                raw = state.last_left_frame_256.copy() if state.last_left_frame_256 is not None \
+                      else np.zeros((crop_size, crop_size, 3), dtype=np.uint8)
+                canvas = np.hstack([left, raw])
             else:
                 canvas = left
 
