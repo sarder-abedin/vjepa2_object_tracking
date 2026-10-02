@@ -19,13 +19,12 @@ vjepaenv/
 *.whl
 *.tar.gz
 
-# Model weights and large binaries
-# (yolov8n.pt is intentionally tracked; other downloaded weights should stay local)
+# Model weights and large binaries (downloaded automatically at runtime)
 *.bin
 *.ckpt
 *.safetensors
 *.pth
-# *.pt  — uncomment if you want to stop tracking new .pt files
+*.pt
 
 # Hugging Face model cache
 .cache/

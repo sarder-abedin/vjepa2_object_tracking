@@ -20,7 +20,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -U pip \
     && pip install --no-cache-dir -r requirements.txt
 
-COPY action_prediction_webcam.py yolov8n.pt ./
+COPY action_prediction_webcam.py ./
+# YOLO26 weights (~5.5 MB) are downloaded automatically on first run.
 
 ENV PYTHONUNBUFFERED=1
 
