@@ -47,7 +47,7 @@ INFO_PANEL_W = 370  # width of the side info panel (display-resolution pixels)
 PRIMARY_EXCLUDE_LABELS_AUTO = {"person"}
 
 # Detector selection
-DETECTOR_MODE = "yolo"   # "yolo" or "owl"
+DETECTOR_MODE = "owl"   # "yolo" or "owl"
 SHOW_DETECTIONS = True
 PRINT_DETS_TO_CONSOLE = True
 
@@ -55,7 +55,7 @@ PRINT_DETS_TO_CONSOLE = True
 YOLO_MODEL_ID = "yolo26n.pt"
 YOLO_CONF = 0.15
 YOLO_IOU = 0.45
-YOLO_EVERY_N_FRAMES = 3
+YOLO_EVERY_N_FRAMES = 4
 
 # OWL-ViT settings
 OWL_MODEL_ID = "google/owlvit-base-patch32"
