@@ -67,7 +67,7 @@ OWL_PROMPTS_DEFAULT = [
     "book", "remote", "pen",
     "chair", "table",
     "bag", "backpack",
-    "cat", "dog",
+    "cat", "dog"
 ]
 
 
