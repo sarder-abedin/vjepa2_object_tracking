@@ -5,7 +5,7 @@ import time
 import numpy as np
 import torch
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import re
 from PIL import Image
 
@@ -41,6 +41,7 @@ SHOW_LATENT_HEATMAP = True
 
 DISPLAY_SCALE = 2  # 1 small, 2 medium, 3 large
 TOPK_ACTIONS = 5
+INFO_PANEL_W = 370  # width of the side info panel (display-resolution pixels)
 
 # Primary selection (auto)
 PRIMARY_EXCLUDE_LABELS_AUTO = {"person"}
@@ -205,6 +206,81 @@ def draw_colorbar_legend(img_bgr: np.ndarray, bar_h: int = 120, bar_w: int = 16,
     cv2.putText(img_bgr, "Sim.",  (x0 - 20, y0 - 7),           cv2.FONT_HERSHEY_SIMPLEX, 0.33, (200, 200, 200), 1, cv2.LINE_AA)
     cv2.putText(img_bgr, "High",  (x0 - 28, y0 + 6),            cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv2.LINE_AA)
     cv2.putText(img_bgr, "Low",   (x0 - 24, y0 + bar_h - 3),    cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv2.LINE_AA)
+
+
+def draw_info_panel(state: AppState, h_px: int) -> np.ndarray:
+    """Dark side panel showing prediction, detections, and key hints."""
+    panel = np.full((h_px, INFO_PANEL_W, 3), 18, dtype=np.uint8)
+    x = 10
+    y = 26
+    step = max(17, h_px // 28)
+    safe_bottom = h_px - 4 * 17 - 10  # reserve space for hints
+
+    def put(text: str, color=(190, 190, 190), scale: float = 0.42, bold: bool = False) -> None:
+        nonlocal y
+        if y < safe_bottom:
+            cv2.putText(panel, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, scale,
+                        color, 2 if bold else 1, cv2.LINE_AA)
+        y += step
+
+    def gap(px: int = 7) -> None:
+        nonlocal y
+        y += px
+
+    det_mode = state.detector_mode.upper()
+    prim_mode = state.primary.mode.upper()
+
+    put("V-JEPA2 SSV2 Prediction", (255, 255, 255), 0.46, bold=True)
+    put(f"Detector: {det_mode}  |  Primary: {prim_mode}", (145, 145, 145), 0.38)
+
+    if state.primary.mode == "manual":
+        if state.primary.selected_label:
+            put(f"Instance: {state.primary.selected_label} ({state.primary.selected_conf:.2f})",
+                (170, 200, 255), 0.38)
+        else:
+            put("Instance: click a box", (120, 120, 195), 0.38)
+
+    gap(6)
+    raw_s = state.last_action_raw
+    fill_s = state.last_action_filled
+    max_c = 46
+    put(f"Raw:    {raw_s[:max_c]}{'…' if len(raw_s) > max_c else ''}", (155, 205, 255), 0.38)
+    put(f"Filled: {fill_s[:max_c]}{'…' if len(fill_s) > max_c else ''}", (90, 250, 130), 0.38)
+
+    gap(6)
+    put("Top-K Actions:", (215, 215, 215), 0.40, bold=True)
+    for i, (lbl, prob) in enumerate(state.last_topk[:5], start=1):
+        short = lbl if len(lbl) <= 42 else lbl[:40] + ".."
+        bar_w = int((INFO_PANEL_W - x - 10) * min(1.0, prob))
+        if y < safe_bottom:
+            cv2.rectangle(panel, (x, y - step + 6), (x + bar_w, y - 3), (38, 58, 88), -1)
+        put(f" #{i} {short}  [{prob:.3f}]", (210, 210, 200), 0.36)
+
+    gap(5)
+    put(f"Infer: {state.last_infer_ms:.0f} ms", (145, 145, 145), 0.38)
+
+    gap(6)
+    put(f"{det_mode} Detections:", (215, 215, 215), 0.38, bold=True)
+    if not state.last_dets:
+        put("  (none)", (100, 100, 100), 0.36)
+    else:
+        for d in state.last_dets[:7]:
+            put(f"  {d['label']}: {d['conf']:.2f}", (180, 205, 175), 0.36)
+
+    # keyboard hints pinned to the bottom
+    hints = [
+        "q/esc quit  b detector  d dets on/off",
+        "m primary   u unset     l latent",
+        "h heatmap   g grid      p OWL prompts",
+        "c console toggle",
+    ]
+    yh = h_px - len(hints) * 17 - 4
+    for hint in hints:
+        cv2.putText(panel, hint, (x, yh), cv2.FONT_HERSHEY_SIMPLEX, 0.33,
+                    (72, 72, 72), 1, cv2.LINE_AA)
+        yh += 17
+
+    return panel
 
 
 def normalize_01(x: np.ndarray) -> np.ndarray:
@@ -620,7 +696,7 @@ def run_owl_on_frame(owl_processor, owl_model, frame_bgr_256: np.ndarray, prompt
 def set_window_medium(latent_on: bool):
     base_w = CROP_SIZE * (2 if latent_on else 1)
     base_h = CROP_SIZE
-    cv2.resizeWindow(WINDOW_NAME, base_w * DISPLAY_SCALE, base_h * DISPLAY_SCALE)
+    cv2.resizeWindow(WINDOW_NAME, base_w * DISPLAY_SCALE + INFO_PANEL_W, base_h * DISPLAY_SCALE)
 
 
 # ----------------------------
@@ -640,6 +716,10 @@ class AppState:
     owl_prompts: list[str]
     editing_prompts: bool = False
     prompt_buffer: str = ""
+    last_action_raw: str = "Buffering..."
+    last_action_filled: str = "Buffering..."
+    last_topk: list = field(default_factory=list)
+    last_infer_ms: float = 0.0
 
 
 def make_mouse_cb(state: AppState):
@@ -816,6 +896,12 @@ def main():
                 names, primary_box_for_highlight = pick_primary_secondary_names(state.primary, state.last_dets, motion_bbox)
                 pretty_label = fill_something_placeholders(pred_label, names)
                 state.last_pred_text = f"{pretty_label} ({pred_prob:.2f})"
+                infer_ms = (time.time() - t0) * 1000
+
+                state.last_action_raw = pred_label
+                state.last_action_filled = pretty_label
+                state.last_topk = [(v_model.config.id2label[int(i)], float(probs[int(i)])) for i in topk_idx]
+                state.last_infer_ms = infer_ms
 
                 print("\n--- V-JEPA2 (SSV2) Action Prediction ---")
                 print(f"Detector: {state.detector_mode.upper()} | Primary mode: {state.primary.mode.upper()}")
@@ -828,7 +914,7 @@ def main():
                 print(f"Action (filled): {pretty_label}")
                 for r, idx in enumerate(topk_idx, start=1):
                     print(f"  #{r}: {v_model.config.id2label[int(idx)]}  prob={float(probs[int(idx)]):.3f}")
-                print(f"Infer time: {(time.time() - t0) * 1000:.0f} ms")
+                print(f"Infer time: {infer_ms:.0f} ms")
 
                 # latent update at inference time
                 if SHOW_LATENT and encoder is not None:
@@ -886,22 +972,9 @@ def main():
                 cv2.putText(canvas, msg[:170], (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.45,
                             (255, 255, 255), 1, cv2.LINE_AA)
 
-            # on-screen text
-            det_txt = f"DETECTOR: {state.detector_mode.upper()} (b) | DETS: {'ON' if SHOW_DETECTIONS else 'OFF'} (d)"
-            prim_txt = f"PRIMARY: {state.primary.mode.upper()} (m) | click box in MANUAL | u unset"
-            cv2.putText(canvas, state.last_pred_text, (8, 22),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
-            cv2.putText(canvas, det_txt, (8, 44),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.46, (255, 255, 255), 1, cv2.LINE_AA)
-            cv2.putText(canvas, prim_txt, (8, 62),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.46, (255, 255, 255), 1, cv2.LINE_AA)
-
-            footer = "q/esc quit | b detector | d det on/off | c det console | p edit OWL prompts | m primary | u unset | l latent | h heatmap | g grid"
-            cv2.putText(canvas, footer, (8, canvas.shape[0] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.42, (255, 255, 255), 1, cv2.LINE_AA)
-
             canvas_big = scale_for_display(canvas, DISPLAY_SCALE)
-            cv2.imshow(WINDOW_NAME, canvas_big)
+            info = draw_info_panel(state, canvas_big.shape[0])
+            cv2.imshow(WINDOW_NAME, np.hstack([canvas_big, info]))
 
             key = cv2.waitKey(1) & 0xFF
 
