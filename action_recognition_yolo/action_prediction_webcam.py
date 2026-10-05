@@ -27,7 +27,7 @@ except Exception:
 # ----------------------------
 # Config
 # ----------------------------
-VJEPA2_MODEL_ID = "facebook/vjepa2-vitg-fpc64-384-ssv2"
+VJEPA2_MODEL_ID = "facebook/vjepa2-vitg-fpc64-256-ssv2" #facebook/vjepa2-vitg-fpc64-384-ssv2
 CAM_INDEX = 0
 
 NUM_FRAMES = 64
