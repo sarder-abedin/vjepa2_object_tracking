@@ -35,19 +35,19 @@ CROP_SIZE = 256
 FRAME_SIZE = (CROP_SIZE, CROP_SIZE)
 
 # UI modes
-SHOW_GRID = False
+SHOW_GRID = True
 SHOW_LATENT = True
 SHOW_LATENT_HEATMAP = True
 
-DISPLAY_SCALE = 2  # 1 small, 2 medium, 3 large
-TOPK_ACTIONS = 5
+DISPLAY_SCALE = 3  # 1 small, 2 medium, 3 large
+TOPK_ACTIONS = 3
 INFO_PANEL_W = 370  # width of the side info panel (display-resolution pixels)
 
 # Primary selection (auto)
 PRIMARY_EXCLUDE_LABELS_AUTO = {"person"}
 
 # Detector selection
-DETECTOR_MODE = "owl"   # "yolo" or "owl"
+DETECTOR_MODE = "yolo"   # "yolo" or "owl"
 SHOW_DETECTIONS = True
 PRINT_DETS_TO_CONSOLE = True
 
@@ -55,18 +55,17 @@ PRINT_DETS_TO_CONSOLE = True
 YOLO_MODEL_ID = "yolo26n.pt"
 YOLO_CONF = 0.15
 YOLO_IOU = 0.45
-YOLO_EVERY_N_FRAMES = 4
+YOLO_EVERY_N_FRAMES = 6
 
 # OWL-ViT settings
 OWL_MODEL_ID = "google/owlvit-base-patch32"
 OWL_SCORE_THRESHOLD = 0.10
-OWL_EVERY_N_FRAMES = 6
+OWL_EVERY_N_FRAMES = 4
 OWL_PROMPTS_DEFAULT = [
-    "person", "hand",
+    "hand", "ball",
     "bottle", "cup", "mug", "glass",
     "phone", "laptop", "keyboard", "mouse",
-    "book", "remote", "pen",
-    "chair", "table",
+    "book", "remote", "pen", "table",
     "bag", "backpack",
     "cat", "dog"
 ]
