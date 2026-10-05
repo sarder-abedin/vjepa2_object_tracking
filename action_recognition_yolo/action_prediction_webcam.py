@@ -44,10 +44,27 @@ TOPK_ACTIONS = 3
 INFO_PANEL_W = 370  # width of the side info panel (display-resolution pixels)
 
 # Labels stripped from all detector output (never drawn, never used in action filling)
-DETECTION_EXCLUDE_LABELS = {"person"}
+DETECTION_EXCLUDE_LABELS = {
+    # People
+    "person",
+    # Vehicles
+    "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
+    # Outdoor / traffic
+    "traffic light", "fire hydrant", "stop sign", "parking meter", "bench",
+    # Animals
+    "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe",
+    # Food
+    "banana", "apple", "sandwich", "orange", "broccoli", "carrot",
+    "hot dog", "pizza", "donut", "cake",
+    # Appliances
+    "microwave", "oven", "toaster", "sink", "refrigerator",
+    # Misc
+    "vase", "teddy bear", "hair drier", "toothbrush",
+}
 
 # Primary selection (auto) — keep in sync with DETECTION_EXCLUDE_LABELS
-PRIMARY_EXCLUDE_LABELS_AUTO = {"person"}
+PRIMARY_EXCLUDE_LABELS_AUTO = DETECTION_EXCLUDE_LABELS
 
 # Detector selection
 DETECTOR_MODE = "yolo"   # "yolo" or "owl"
