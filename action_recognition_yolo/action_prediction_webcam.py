@@ -43,7 +43,10 @@ DISPLAY_SCALE = 3  # 1 small, 2 medium, 3 large
 TOPK_ACTIONS = 3
 INFO_PANEL_W = 370  # width of the side info panel (display-resolution pixels)
 
-# Primary selection (auto)
+# Labels stripped from all detector output (never drawn, never used in action filling)
+DETECTION_EXCLUDE_LABELS = {"person"}
+
+# Primary selection (auto) — keep in sync with DETECTION_EXCLUDE_LABELS
 PRIMARY_EXCLUDE_LABELS_AUTO = {"person"}
 
 # Detector selection
@@ -854,9 +857,10 @@ def main():
 
                 if run_detector:
                     if state.detector_mode == "yolo":
-                        state.last_dets = run_yolo_on_frame(yolo_model, left, yolo_device) if yolo_model is not None else []
+                        raw_dets = run_yolo_on_frame(yolo_model, left, yolo_device) if yolo_model is not None else []
                     else:
-                        state.last_dets = run_owl_on_frame(owl_processor, owl_model, left, state.owl_prompts, device) if owl_model is not None else []
+                        raw_dets = run_owl_on_frame(owl_processor, owl_model, left, state.owl_prompts, device) if owl_model is not None else []
+                    state.last_dets = [d for d in raw_dets if d["label"] not in DETECTION_EXCLUDE_LABELS]
 
                     if PRINT_DETS_TO_CONSOLE:
                         if len(state.last_dets) == 0:
