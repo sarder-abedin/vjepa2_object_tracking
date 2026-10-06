@@ -28,14 +28,14 @@ except Exception:
 # Config
 # ----------------------------
 VJEPA2_MODEL_ID = "facebook/vjepa2-vitl-fpc16-256-ssv2"
-CAM_INDEX = 0
+CAM_INDEX = 1
 
 NUM_FRAMES = 7
 CROP_SIZE = 256
 FRAME_SIZE = (CROP_SIZE, CROP_SIZE)
 
 # UI modes
-SHOW_GRID = True
+SHOW_GRID = False
 SHOW_LATENT = True
 SHOW_LATENT_HEATMAP = True
 
@@ -60,7 +60,7 @@ DETECTION_EXCLUDE_LABELS = {
     # Appliances
     "microwave", "oven", "toaster", "sink", "refrigerator",
     # Misc
-    "vase", "teddy bear", "hair drier", "toothbrush",
+    "chair","vase", "teddy bear", "hair drier", "toothbrush",
 }
 
 # Primary selection (auto) — keep in sync with DETECTION_EXCLUDE_LABELS
@@ -75,11 +75,11 @@ PRINT_DETS_TO_CONSOLE = True
 YOLO_MODEL_ID = "yolo26x-seg.pt"
 YOLO_CONF = 0.25
 YOLO_IOU = 0.45
-YOLO_EVERY_N_FRAMES = 6
+YOLO_EVERY_N_FRAMES = 3
 
 # OWL-ViT settings
 OWL_MODEL_ID = "google/owlvit-base-patch32"
-OWL_SCORE_THRESHOLD = 0.10
+OWL_SCORE_THRESHOLD = 0.25
 OWL_EVERY_N_FRAMES = 4
 OWL_PROMPTS_DEFAULT = [
     "hand", "ball",
