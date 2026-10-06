@@ -228,14 +228,26 @@ def draw_colorbar_legend(img_bgr: np.ndarray, bar_h: int = 120, bar_w: int = 16,
 
 
 def draw_info_panel(state: AppState, h_px: int) -> np.ndarray:
-    """Dark side panel showing prediction, detections, and key hints."""
-    panel = np.full((h_px, INFO_PANEL_W, 3), 18, dtype=np.uint8)
+    """White side panel showing prediction, detections, and key hints."""
+    panel = np.full((h_px, INFO_PANEL_W, 3), 255, dtype=np.uint8)
     x = 10
-    y = 26
-    step = max(17, h_px // 28)
-    safe_bottom = h_px - 4 * 17 - 10  # reserve space for hints
+    y = 28
+    step = max(20, h_px // 26)
+    safe_bottom = h_px - 4 * 18 - 12  # reserve space for hints
 
-    def put(text: str, color=(190, 190, 190), scale: float = 0.42, bold: bool = False) -> None:
+    # Dark colors for white background
+    C_TITLE    = (20,  20,  20)   # near-black
+    C_META     = (100, 100, 100)  # medium gray
+    C_RAW      = (160, 50,  10)   # dark navy-blue (BGR)
+    C_FILLED   = (0,   110, 210)  # vivid orange (BGR)  ← [something] substitutions stand out
+    C_TOPK_LBL = (50,  50,  50)   # dark gray
+    C_TOPK_PRB = (120, 120, 120)  # medium gray
+    C_DET      = (65,  65,  65)   # dark gray
+    C_NONE     = (170, 170, 170)  # light gray
+    C_HINT     = (175, 175, 175)  # light gray (bottom hints)
+    C_BAR      = (215, 210, 200)  # very light warm gray bars
+
+    def put(text: str, color=C_META, scale: float = 0.50, bold: bool = False) -> None:
         nonlocal y
         if y < safe_bottom:
             cv2.putText(panel, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, scale,
@@ -249,42 +261,45 @@ def draw_info_panel(state: AppState, h_px: int) -> np.ndarray:
     det_mode = state.detector_mode.upper()
     prim_mode = state.primary.mode.upper()
 
-    put("V-JEPA2 SSV2 Prediction", (255, 255, 255), 0.46, bold=True)
-    put(f"Detector: {det_mode}  |  Primary: {prim_mode}", (145, 145, 145), 0.38)
+    put("V-JEPA2 SSV2 Prediction", C_TITLE, 0.54, bold=True)
+    # thin separator under title
+    if y - step + 4 < h_px:
+        cv2.line(panel, (x, y - step + 6), (INFO_PANEL_W - x, y - step + 6), (210, 210, 210), 1)
+    put(f"Detector: {det_mode}  |  Primary: {prim_mode}", C_META, 0.44)
 
     if state.primary.mode == "manual":
         if state.primary.selected_label:
             put(f"Instance: {state.primary.selected_label} ({state.primary.selected_conf:.2f})",
-                (170, 200, 255), 0.38)
+                C_RAW, 0.44)
         else:
-            put("Instance: click a box", (120, 120, 195), 0.38)
+            put("Instance: click a box", C_META, 0.44)
 
     gap(6)
     raw_s = state.last_action_raw
     fill_s = state.last_action_filled
-    max_c = 46
-    put(f"Raw:    {raw_s[:max_c]}{'…' if len(raw_s) > max_c else ''}", (155, 205, 255), 0.38)
-    put(f"Filled: {fill_s[:max_c]}{'…' if len(fill_s) > max_c else ''}", (90, 250, 130), 0.38)
+    max_c = 44
+    put(f"Raw:    {raw_s[:max_c]}{'>' if len(raw_s) > max_c else ''}", C_RAW, 0.46)
+    put(f"Filled: {fill_s[:max_c]}{'>' if len(fill_s) > max_c else ''}", C_FILLED, 0.46)
 
     gap(6)
-    put("Top-K Actions:", (215, 215, 215), 0.40, bold=True)
+    put("Top-K Actions:", C_TITLE, 0.48, bold=True)
     for i, (lbl, prob) in enumerate(state.last_topk[:5], start=1):
-        short = lbl if len(lbl) <= 42 else lbl[:40] + ".."
+        short = lbl if len(lbl) <= 40 else lbl[:38] + ".."
         bar_w = int((INFO_PANEL_W - x - 10) * min(1.0, prob))
         if y < safe_bottom:
-            cv2.rectangle(panel, (x, y - step + 6), (x + bar_w, y - 3), (38, 58, 88), -1)
-        put(f" #{i} {short}  [{prob:.3f}]", (210, 210, 200), 0.36)
+            cv2.rectangle(panel, (x, y - step + 6), (x + bar_w, y - 3), C_BAR, -1)
+        put(f" #{i} {short}  [{prob:.3f}]", C_TOPK_LBL, 0.42)
 
     gap(5)
-    put(f"Infer: {state.last_infer_ms:.0f} ms", (145, 145, 145), 0.38)
+    put(f"Infer: {state.last_infer_ms:.0f} ms", C_TOPK_PRB, 0.46)
 
     gap(6)
-    put(f"{det_mode} Detections:", (215, 215, 215), 0.38, bold=True)
+    put(f"{det_mode} Detections:", C_TITLE, 0.46, bold=True)
     if not state.last_dets:
-        put("  (none)", (100, 100, 100), 0.36)
+        put("  (none)", C_NONE, 0.42)
     else:
-        for d in state.last_dets[:7]:
-            put(f"  {d['label']}: {d['conf']:.2f}", (180, 205, 175), 0.36)
+        for d in state.last_dets[:5]:
+            put(f"  {d['label']}: {d['conf']:.2f}", C_DET, 0.44)
 
     # keyboard hints pinned to the bottom
     hints = [
@@ -293,11 +308,11 @@ def draw_info_panel(state: AppState, h_px: int) -> np.ndarray:
         "h heatmap   g grid      p OWL prompts",
         "c console toggle",
     ]
-    yh = h_px - len(hints) * 17 - 4
+    yh = h_px - len(hints) * 18 - 4
     for hint in hints:
-        cv2.putText(panel, hint, (x, yh), cv2.FONT_HERSHEY_SIMPLEX, 0.33,
-                    (72, 72, 72), 1, cv2.LINE_AA)
-        yh += 17
+        cv2.putText(panel, hint, (x, yh), cv2.FONT_HERSHEY_SIMPLEX, 0.35,
+                    C_HINT, 1, cv2.LINE_AA)
+        yh += 18
 
     return panel
 
