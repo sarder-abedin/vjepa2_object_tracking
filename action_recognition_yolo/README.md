@@ -4,7 +4,7 @@ This project runs a live webcam demo that combines:
 
 - **V-JEPA2 video action classification (SSV2 fine-tuned)** to predict an action label for short clips (e.g., *"Showing [something] next to [something]"*).
 - **Object detection** using **either**:
-  - **YOLOv8 (Ultralytics)** — fast, fixed-category COCO-style detector, or
+  - **YOLOv26/seg (Ultralytics)** — fast, fixed-category COCO-style detector, or
   - **OWL-ViT (open-vocabulary)** — detects only what you request via text prompts.
 
 The demo can **replace** the action label's `[something]` placeholders with detected object names (best-effort heuristic) and optionally shows a **latent-space visualization** (heatmap + scatter) from the V-JEPA2 backbone.
