@@ -12,7 +12,7 @@ Click a patch in the live webcam frame and the demo tracks it by following the m
 
 ### 2. [`action_recognition_yolo/`](action_recognition_yolo/) — V-JEPA2 SSV2 Action Recognition + YOLO/OWL-ViT
 
-Classifies the action happening in a short clip with a V-JEPA2 model fine-tuned on Something-Something v2 (e.g., *"Showing [something] next to [something]"*), and fills in the `[something]` placeholders with object names detected live by YOLOv8 or OWL-ViT. Also shows an optional latent-space visualization panel.
+Classifies the action happening in a short clip with a V-JEPA2 model fine-tuned on Something-Something v2 (e.g., *"Showing [something] next to [something]"*), and fills in the `[something]` placeholders with object names detected live by YOLO26/seg or OWL-ViT. Also shows an optional latent-space visualization panel.
 
 → See [`action_recognition_yolo/README.md`](action_recognition_yolo/README.md) for installation, usage, controls, and Docker instructions.
 
