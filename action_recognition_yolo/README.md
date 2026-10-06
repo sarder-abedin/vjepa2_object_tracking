@@ -24,8 +24,8 @@ The demo can **replace** the action label's `[something]` placeholders with dete
    - Optional latent scatter panel (right side)
 
 ## Demo Preview
-<img width="1023" height="532" alt="Screenshot 2026-03-02 at 09 28 46" src="https://github.com/user-attachments/assets/2936a968-7445-4429-8c55-2fdcf2d2a4b2" />
-<img width="721" height="246" alt="Screenshot 2026-03-02 at 09 41 53" src="https://github.com/user-attachments/assets/f9bc2709-567f-4df9-b3ea-4b5dc1d645e6" />
+<img width="994" height="422" alt="image" src="https://github.com/user-attachments/assets/d031bebf-6c0e-4c68-9de1-099246696b66" />
+
 
 ---
 
